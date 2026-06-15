@@ -7,6 +7,7 @@ namespace ADExplorer.Services;
 public class AdService
 {
     private readonly string _ldapRoot;
+    private readonly string _domainName;
 
     public AdService()
     {
@@ -14,28 +15,24 @@ public class AdService
         {
             var domain = Domain.GetCurrentDomain();
             _ldapRoot = $"LDAP://{domain.Name}";
+            _domainName = domain.Name;
         }
         catch
         {
             _ldapRoot = "LDAP://";
+            _domainName = "Not connected";
         }
     }
 
-    public string DomainName
-    {
-        get
-        {
-            try { return Domain.GetCurrentDomain().Name; }
-            catch { return "Not connected"; }
-        }
-    }
+    public string DomainName => _domainName;
 
     // ── User Search ────────────────────────────────────────────────
 
     public List<AdUser> SearchUsers(string query)
     {
+        var q = EscapeLdap(query);
         var filter = $"(&(objectClass=user)(objectCategory=person)" +
-                     $"(|(displayName=*{query}*)(sAMAccountName=*{query}*)(mail=*{query}*)))";
+                     $"(|(displayName=*{q}*)(sAMAccountName=*{q}*)(mail=*{q}*)))";
         return SearchDirectory<AdUser>(filter, BuildUser);
     }
 
@@ -53,7 +50,8 @@ public class AdService
 
     public List<AdGroup> SearchGroups(string query)
     {
-        var filter = $"(&(objectClass=group)(name=*{query}*))";
+        var q = EscapeLdap(query);
+        var filter = $"(&(objectClass=group)(name=*{q}*))";
         return SearchDirectory<AdGroup>(filter, BuildGroup);
     }
 
@@ -61,11 +59,23 @@ public class AdService
 
     public List<AdComputer> SearchComputers(string query)
     {
-        var filter = $"(&(objectClass=computer)(name=*{query}*))";
+        var q = EscapeLdap(query);
+        var filter = $"(&(objectClass=computer)(name=*{q}*))";
         return SearchDirectory<AdComputer>(filter, BuildComputer);
     }
 
     // ── Private helpers ────────────────────────────────────────────
+
+    public static string EscapeLdap(string value)
+    {
+        // RFC 4515: escape *, (, ), \, NUL in LDAP filter values
+        return value
+            .Replace("\\", "\\5c")
+            .Replace("*",  "\\2a")
+            .Replace("(",  "\\28")
+            .Replace(")",  "\\29")
+            .Replace("\0", "\\00");
+    }
 
     private List<T> SearchDirectory<T>(string filter, Func<DirectoryEntry, T> builder)
     {
@@ -97,10 +107,10 @@ public class AdService
             pwdExpiry = setDate + maxAge;
         }
 
-        var groups = new List<string>();
-        if (e.Properties["memberOf"].Value is object[] memberOf)
-            foreach (var g in memberOf)
-                groups.Add(ParseCN(g.ToString() ?? ""));
+        var groups = e.Properties["memberOf"]
+            .Cast<string>()
+            .Select(ParseCN)
+            .ToList();
 
         return new AdUser
         {
@@ -125,10 +135,10 @@ public class AdService
 
     private static AdGroup BuildGroup(DirectoryEntry e)
     {
-        var members = new List<string>();
-        if (e.Properties["member"].Value is object[] memberArr)
-            foreach (var m in memberArr)
-                members.Add(ParseCN(m.ToString() ?? ""));
+        var members = e.Properties["member"]
+            .Cast<string>()
+            .Select(ParseCN)
+            .ToList();
 
         return new AdGroup
         {

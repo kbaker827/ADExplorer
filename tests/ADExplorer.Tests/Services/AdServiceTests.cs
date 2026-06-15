@@ -42,4 +42,18 @@ public class AdServiceTests
         Assert.NotNull(result);
         Assert.Equal(2026, result!.Value.ToUniversalTime().Year);
     }
+
+    [Fact]
+    public void EscapeLdap_EscapesSpecialCharacters()
+    {
+        var result = AdService.EscapeLdap("test*(user)\\name");
+        Assert.Equal("test\\2a\\28user\\29\\5cname", result);
+    }
+
+    [Fact]
+    public void EscapeLdap_ReturnsUnchanged_ForPlainString()
+    {
+        var result = AdService.EscapeLdap("john doe");
+        Assert.Equal("john doe", result);
+    }
 }
