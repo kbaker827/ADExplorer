@@ -22,10 +22,12 @@ public class AdUser
     public string LastLogonDisplay =>
         LastLogon.HasValue ? LastLogon.Value.ToString("yyyy-MM-dd HH:mm") : "Never";
 
-    public int PasswordExpiryDays =>
-        PasswordExpiryDate.HasValue
-            ? (int)(PasswordExpiryDate.Value - DateTime.Now).TotalDays
-            : -1;
+    public int PasswordExpiryDays(DateTime? referenceDate = null)
+    {
+        if (!PasswordExpiryDate.HasValue) return -1;
+        var reference = referenceDate ?? DateTime.Now;
+        return (int)(PasswordExpiryDate.Value - reference).TotalDays;
+    }
 
     public string StatusDisplay => IsEnabled ? "✅ Enabled" : "❌ Disabled";
     public string LockedDisplay => IsLockedOut ? "⚠️ Yes" : "No";

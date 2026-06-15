@@ -8,21 +8,23 @@ public class AdUserTests
     [Fact]
     public void PasswordExpiryDays_ReturnsNegative_WhenAlreadyExpired()
     {
+        var reference = new DateTime(2026, 6, 15);
         var user = new AdUser
         {
-            PasswordExpiryDate = DateTime.Now.AddDays(-5)
+            PasswordExpiryDate = reference.AddDays(-5)
         };
-        Assert.True(user.PasswordExpiryDays < 0);
+        Assert.True(user.PasswordExpiryDays(reference) < 0);
     }
 
     [Fact]
     public void PasswordExpiryDays_ReturnsPositive_WhenNotExpired()
     {
+        var reference = new DateTime(2026, 6, 15);
         var user = new AdUser
         {
-            PasswordExpiryDate = DateTime.Now.AddDays(14)
+            PasswordExpiryDate = reference.AddDays(14)
         };
-        Assert.InRange(user.PasswordExpiryDays, 13, 15);
+        Assert.Equal(14, user.PasswordExpiryDays(reference));
     }
 
     [Fact]
