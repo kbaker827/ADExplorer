@@ -1,23 +1,25 @@
-﻿using System.Text;
+﻿using ADExplorer.Services;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace ADExplorer;
 
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
 public partial class MainWindow : Window
 {
+    private readonly AdService _adService = new();
+
     public MainWindow()
     {
         InitializeComponent();
+        DomainText.Text = $"Connected to: {_adService.DomainName}";
+        ResultCountText.Text = "Results: 0";
+
+        UserView.AdService = _adService;
+        GroupView.AdService = _adService;
+        ComputerView.AdService = _adService;
+    }
+
+    private void OnResultCountChanged(object sender, int count)
+    {
+        ResultCountText.Text = $"Results: {count}";
     }
 }
