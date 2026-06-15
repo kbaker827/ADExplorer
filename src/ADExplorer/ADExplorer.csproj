@@ -12,6 +12,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Graph" Version="5.65.0" />
     <PackageReference Include="Azure.Identity" Version="1.13.1" />
+    <PackageReference Include="System.DirectoryServices" Version="8.0.0" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Page Remove="Themes\LightTheme.xaml" />
