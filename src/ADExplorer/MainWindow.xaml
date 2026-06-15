@@ -4,6 +4,7 @@
         xmlns:views="clr-namespace:ADExplorer.Views"
         Title="AD Explorer" Height="700" Width="1100"
         MinHeight="500" MinWidth="800"
+        Icon="Resources/app.ico"
         Background="{DynamicResource WindowBackground}"
         WindowStartupLocation="CenterScreen">
 
