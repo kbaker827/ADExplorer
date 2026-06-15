@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ADExplorer/ADExplorer.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ADExplorer.Tests/ADExplorer.Tests.csproj" />
+  </Folder>
+</Solution>
