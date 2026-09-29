@@ -56,4 +56,37 @@ public class AdServiceTests
         var result = AdService.EscapeLdap("john doe");
         Assert.Equal("john doe", result);
     }
+
+    [Fact]
+    public void EscapeLdap_EscapesNul()
+    {
+        Assert.Equal("a\\00b", AdService.EscapeLdap("a\0b"));
+    }
+
+    [Theory]
+    [InlineData("CN=John Doe,OU=Staff,DC=corp,DC=local", "John Doe")]
+    [InlineData("CN=Smith\\, John,OU=Staff,DC=corp,DC=local", "Smith, John")]
+    [InlineData("CN=Ren\\C3\\A9e Dupont,OU=Staff,DC=corp", "Renée Dupont")]
+    [InlineData("CN=Domain Admins,CN=Users,DC=corp,DC=local", "Domain Admins")]
+    [InlineData("OU=Staff,DC=corp", "Staff")]
+    [InlineData("plain", "plain")]
+    [InlineData("", "")]
+    public void ParseCN_ReturnsUnescapedFirstRdnValue(string dn, string expected)
+    {
+        Assert.Equal(expected, AdService.ParseCN(dn));
+    }
+
+    [Fact]
+    public void EscapeAdsPath_EscapesForwardSlash()
+    {
+        Assert.Equal("CN=A\\/B,DC=corp", AdService.EscapeAdsPath("CN=A/B,DC=corp"));
+    }
+
+    [Theory]
+    [InlineData(-1L)]
+    [InlineData(long.MinValue)]
+    public void ParseFileTime_ReturnsNull_ForNegative(long value)
+    {
+        Assert.Null(AdService.ParseFileTime(value));
+    }
 }

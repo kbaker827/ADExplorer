@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -19,7 +22,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore tests/ADExplorer.Tests
 
       - name: Test
         run: dotnet test tests/ADExplorer.Tests --no-restore

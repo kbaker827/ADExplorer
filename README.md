@@ -9,6 +9,7 @@ A modern Active Directory lookup tool for IT professionals. Search users, groups
 - **Computer Search** — Look up machines by hostname with OS info and last logon.
 - **System Theme** — Automatically follows Windows light/dark mode and accent color.
 - **Copy to Clipboard** — One-click copy for email and username.
+- **Responsive** — Searches run in the background, and directory errors are shown instead of an empty list.
 
 ## Requirements
 
@@ -39,8 +40,16 @@ git tag v1.0.1
 git push --tags
 ```
 
+## Running Tests
+
+```powershell
+dotnet test tests/ADExplorer.Tests
+```
+
 ## How It Works
 
 - Queries your on-premises Active Directory via LDAP (no extra configuration needed on domain-joined machines)
+- Searches return up to 200 matches; refine the search term to narrow results
+- Lockout state and password expiry come from AD's computed attributes, so fine-grained password policies are respected
 - Optional Microsoft Graph API fallback for hybrid Azure AD environments
 - Theme follows your Windows personalization settings automatically

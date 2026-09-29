@@ -26,18 +26,23 @@ public class GraphService
 
     public async Task<List<AdUser>> SearchUsersAsync(string query)
     {
-        if (_client == null) return new();
+        if (_client == null || string.IsNullOrWhiteSpace(query)) return new();
+
+        // $search terms are wrapped in double quotes; strip any the user typed so they
+        // cannot break out of the term.
+        var term = query.Replace("\"", string.Empty).Trim();
         try
         {
             var users = await _client.Users.GetAsync(config =>
             {
-                config.QueryParameters.Search = $"\"displayName:{query}\" OR \"userPrincipalName:{query}\"";
+                config.QueryParameters.Search = $"\"displayName:{term}\" OR \"userPrincipalName:{term}\"";
                 config.QueryParameters.Select = new[]
                 {
                     "displayName", "userPrincipalName", "mail", "jobTitle",
-                    "department", "manager", "mobilePhone", "accountEnabled",
+                    "department", "mobilePhone", "businessPhones", "accountEnabled",
                     "createdDateTime", "id"
                 };
+                config.QueryParameters.Top = AdService.MaxResults;
                 config.Headers.Add("ConsistencyLevel", "eventual");
             });
 
@@ -48,9 +53,9 @@ public class GraphService
                 Email          = u.Mail ?? u.UserPrincipalName ?? string.Empty,
                 Title          = u.JobTitle ?? string.Empty,
                 Department     = u.Department ?? string.Empty,
-                Phone          = u.MobilePhone ?? string.Empty,
+                Phone          = u.BusinessPhones?.FirstOrDefault() ?? u.MobilePhone ?? string.Empty,
                 IsEnabled      = u.AccountEnabled ?? false,
-                Created        = u.CreatedDateTime?.DateTime,
+                Created        = u.CreatedDateTime?.LocalDateTime,
             }).ToList() ?? new();
         }
         catch { return new(); }
