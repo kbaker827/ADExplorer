@@ -22,11 +22,29 @@ public class AdUser
     public string LastLogonDisplay =>
         LastLogon.HasValue ? LastLogon.Value.ToString("yyyy-MM-dd HH:mm") : "Never";
 
-    public int PasswordExpiryDays(DateTime? referenceDate = null)
+    /// <summary>
+    /// Whole days until the password expires (negative once expired), or null if it never expires.
+    /// </summary>
+    public int? PasswordExpiryDays(DateTime? referenceDate = null)
     {
-        if (!PasswordExpiryDate.HasValue) return -1;
+        if (!PasswordExpiryDate.HasValue) return null;
         var reference = referenceDate ?? DateTime.Now;
-        return (int)(PasswordExpiryDate.Value - reference).TotalDays;
+        return (int)Math.Floor((PasswordExpiryDate.Value - reference).TotalDays);
+    }
+
+    public string PasswordExpiryDisplay(DateTime? referenceDate = null)
+    {
+        var days = PasswordExpiryDays(referenceDate);
+        if (days is not int d) return "No expiry";
+
+        var date = PasswordExpiryDate!.Value.ToString("yyyy-MM-dd");
+        return d switch
+        {
+            < 0  => $"Expired ({date})",
+            0    => $"Expires in under a day ({date})",
+            1    => $"1 day ({date})",
+            _    => $"{d} days ({date})",
+        };
     }
 
     public string StatusDisplay => IsEnabled ? "✅ Enabled" : "❌ Disabled";

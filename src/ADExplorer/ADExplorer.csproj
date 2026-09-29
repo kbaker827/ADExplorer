@@ -21,5 +21,7 @@
     <Page Remove="Themes\DarkTheme.xaml" />
     <Resource Include="Themes\LightTheme.xaml" />
     <Resource Include="Themes\DarkTheme.xaml" />
+    <!-- Window.Icon loads this via a pack URI, so it must be a WPF resource too -->
+    <Resource Include="Resources\app.ico" />
   </ItemGroup>
 </Project>

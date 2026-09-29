@@ -28,6 +28,39 @@ public class AdUserTests
     }
 
     [Fact]
+    public void PasswordExpiryDays_ReturnsNull_WhenNoExpiry()
+    {
+        var user = new AdUser { PasswordExpiryDate = null };
+        Assert.Null(user.PasswordExpiryDays());
+    }
+
+    [Fact]
+    public void PasswordExpiryDays_ReturnsNegative_WhenExpiredLessThanADayAgo()
+    {
+        var reference = new DateTime(2026, 6, 15, 12, 0, 0);
+        var user = new AdUser { PasswordExpiryDate = reference.AddHours(-2) };
+        Assert.Equal(-1, user.PasswordExpiryDays(reference));
+    }
+
+    [Theory]
+    [InlineData(-3.0, "Expired (2026-06-12)")]
+    [InlineData(0.5, "Expires in under a day (2026-06-16)")]
+    [InlineData(1.0, "1 day (2026-06-16)")]
+    [InlineData(14.0, "14 days (2026-06-29)")]
+    public void PasswordExpiryDisplay_FormatsRelativeExpiry(double daysFromNow, string expected)
+    {
+        var reference = new DateTime(2026, 6, 15, 12, 0, 0);
+        var user = new AdUser { PasswordExpiryDate = reference.AddDays(daysFromNow) };
+        Assert.Equal(expected, user.PasswordExpiryDisplay(reference));
+    }
+
+    [Fact]
+    public void PasswordExpiryDisplay_ReturnsNoExpiry_WhenNull()
+    {
+        Assert.Equal("No expiry", new AdUser().PasswordExpiryDisplay());
+    }
+
+    [Fact]
     public void LastLogonDisplay_ReturnsNever_WhenNull()
     {
         var user = new AdUser { LastLogon = null };

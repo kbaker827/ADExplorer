@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore tests/ADExplorer.Tests
+
+      - name: Build
+        run: dotnet build tests/ADExplorer.Tests --no-restore -c Release
+
+      - name: Test
+        run: dotnet test tests/ADExplorer.Tests --no-build -c Release
